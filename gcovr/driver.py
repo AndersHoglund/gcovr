@@ -113,7 +113,7 @@ def main(options, args):
     #
     paths = args
     if len(args) == 0:
-        paths = [options.root]
+        paths = [options.objdir]
 
     covdata = get_coverage_data(paths, options)
 
