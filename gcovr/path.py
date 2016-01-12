@@ -182,3 +182,11 @@ def search_file(expr, path):
                 else:
                     ans.append(os.path.abspath(name))
     return ans
+
+
+def find_file(path, name):
+    result = []
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            result.append(os.path.join(root, name))
+    return result

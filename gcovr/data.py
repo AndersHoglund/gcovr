@@ -15,7 +15,7 @@ import sys
 import copy
 import subprocess
 
-from .path import search_file, aliases
+from .path import find_file, search_file, aliases
 
 
 output_re = re.compile("[Cc]reating [`'](.*)'$")
@@ -231,6 +231,20 @@ def process_gcov_data(data_fname, covdata, options):
         fname = os.path.abspath((segments[-1]).strip())
     else:
         fname = aliases.unalias_path(os.path.abspath((segments[-1]).strip()))
+
+    if not os.path.isfile(fname):
+        fname_matches = find_file(options.root_dir, segments[-1].strip())
+        if len(fname_matches) == 0 and options.objdir:
+            fname_matches = find_file(options.objdir, segments[-1].strip())
+        if len(fname_matches) == 1:
+            fname = fname_matches[0]
+        elif len(fname_matches) == 0:
+            if options.verbose:
+                sys.stdout.write('No source file found for gcov file "%s" (looking for "%s")\n' % (data_fname, segments[-1].strip()))
+            return
+        elif options.verbose:
+            sys.stdout.write('Multiple source files found for gcov file "%s": \n\t%s\n' % (data_fname, '\n\t'.join(fname_matches)))
+
     os.chdir(currdir)
     if options.verbose:
         sys.stdout.write("Parsing coverage data for file %s\n" % fname)
